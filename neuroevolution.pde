@@ -20,15 +20,30 @@ void setup() {
 
 void draw() {
   background(255, 255, 255);
-  
+
   for (Obstacle o : obstacles) {
     o.show();
   }
 
-  PVector obst = car.llIntersection(obstacles);
-  if (obst != null) {
-    line(car.pos.x, car.pos.y, obst.x, obst.y);
-    println("x: " + obst.x + "  y: " + obst.y);
+  PVector closest_obst = car.findObstacles(obstacles, -60);
+  if (closest_obst != null 
+    && closest_obst.x != 0 
+    && closest_obst.y != 0) { // to avoid pointing 0,0 
+    line(car.pos.x, car.pos.y, closest_obst.x, closest_obst.y);
+  }
+
+  PVector closest_obst2 = car.findObstacles(obstacles, 60);
+  if (closest_obst2 != null 
+    && closest_obst2.x != 0 
+    && closest_obst2.y != 0) { // to avoid pointing 0,0 
+    line(car.pos.x, car.pos.y, closest_obst2.x, closest_obst2.y);
+  }
+  
+  PVector closest_obst3 = car.findObstacles(obstacles, 0);
+  if (closest_obst3 != null 
+    && closest_obst3.x != 0 
+    && closest_obst3.y != 0) { // to avoid pointing 0,0 
+    line(car.pos.x, car.pos.y, closest_obst3.x, closest_obst3.y);
   }
 
   car.update();
@@ -38,10 +53,10 @@ void draw() {
 
 void keyPressed() {
   if (key == 'a') {
-    car.rotateBy(-5);
+    car.rotateBy(-6);
   }
   if (key == 'd') {
-    car.rotateBy(5);
+    car.rotateBy(6);
   }
 }
 

@@ -16,10 +16,11 @@ class Car {
     this.rotation += angle;
   }
 
-  PVector llIntersection(ArrayList<Obstacle> obstacles) {
+  PVector findObstacles(ArrayList<Obstacle> obstacles, float offset) {
+
+    ArrayList<PVector> intersections = new ArrayList();
 
     for (Obstacle o : obstacles) {
-
       float x1 = o.x1;
       float y1 = o.y1;
       float x2 = o.x2;
@@ -27,8 +28,9 @@ class Car {
 
       float x3 = this.pos.x;
       float y3 = this.pos.y;
-      float x4 = this.pos.x + PVector.fromAngle(radians(this.rotation)).x;
-      float y4 = this.pos.y + PVector.fromAngle(radians(this.rotation)).y;
+      // add 0.0001 to avoid vector being 0.
+      float x4 = this.pos.x + PVector.fromAngle(radians(this.rotation + offset)).x + 0.0001;
+      float y4 = this.pos.y + PVector.fromAngle(radians(this.rotation + offset)).y + 0.0001;
 
       float den = ((x1 - x2)*(y3 - y4) - (y1 - y2)*(x3 - x4));
 
@@ -38,9 +40,25 @@ class Car {
       float u = -((x1 - x2)*(y1 - y3) - (y1 - y2)*(x1 - x3)) / den;
 
       if (t > 0 && t < 1 && u > 0) {
-        return new PVector(x1 + t*(x2 - x1), y1 + t*(y2 - y1));
-      } else return null;
+        //intersections.add(new PVector(x1 + t*(x2 - x1), y1 + t*(y2 - y1)));
+        intersections.add(new PVector(x3 + u*(x4 - x3), y3 + u*(y4 - y3)));
+      }
     }
+
+    return getNearest(intersections, this.pos);
+  }
+
+  PVector getNearest(ArrayList<PVector> vectors, PVector position) {
+    PVector shortest = new PVector();
+    float dist = 10000000; // it should never be bigger.
+    for (PVector v : vectors) {
+      if (PVector.dist(position, v) < dist) {
+        dist = PVector.dist(position, v);
+        shortest.set(v.x, v.y);
+      }
+    }
+
+    return shortest;
   }
 
   void update() {
