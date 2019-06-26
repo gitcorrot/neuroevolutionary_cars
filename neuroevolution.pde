@@ -4,49 +4,38 @@ import org.neuroph.util.*;
 
 import java.util.*;
 
-ArrayList<Obstacle> obstacles = new ArrayList();
 Car car;
+ArrayList<Obstacle> obstacles = new ArrayList();
 int thickness = 150;
-int speed = 10;
-int start_x = 70;
-int start_y = 50;
+int speed = 2;
+PVector start, finish;
 
 void setup() {
   size(800, 600);
+  start = new PVector(70, 50);
+  finish = new PVector(2*thickness, height-thickness/2);
+
   initializeObstacle();
 
-  car = new Car(start_x, start_y, 40, 10, speed);
+  car = new Car((int)start.x, (int)start.y, 30, 10, speed);
 }
 
 void draw() {
   background(255, 255, 255);
 
+  ellipseMode(CENTER);
+  fill(120, 255, 55);
+  ellipse(start.x, start.y, 55, 55);
+  fill(255, 55, 120);
+  ellipse(finish.x, finish.y, 55, 55);
+
   for (Obstacle o : obstacles) {
     o.show();
   }
 
-  PVector closest_obst = car.findObstacles(obstacles, -60);
-  if (closest_obst != null 
-    && closest_obst.x != 0 
-    && closest_obst.y != 0) { // to avoid pointing 0,0 
-    line(car.pos.x, car.pos.y, closest_obst.x, closest_obst.y);
-  }
-
-  PVector closest_obst2 = car.findObstacles(obstacles, 60);
-  if (closest_obst2 != null 
-    && closest_obst2.x != 0 
-    && closest_obst2.y != 0) { // to avoid pointing 0,0 
-    line(car.pos.x, car.pos.y, closest_obst2.x, closest_obst2.y);
-  }
-  
-  PVector closest_obst3 = car.findObstacles(obstacles, 0);
-  if (closest_obst3 != null 
-    && closest_obst3.x != 0 
-    && closest_obst3.y != 0) { // to avoid pointing 0,0 
-    line(car.pos.x, car.pos.y, closest_obst3.x, closest_obst3.y);
-  }
-
   car.update();
+  println(car.dead);
+  car.updateDistances(obstacles);
   car.show();
 }
 
