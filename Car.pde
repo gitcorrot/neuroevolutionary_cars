@@ -1,6 +1,7 @@
 class Car {
 
-  final int size_w, size_h, speed;
+  final int size_w, size_h;
+  float speed;
   PVector pos;
   float rotation;
   float fitness;
@@ -12,7 +13,7 @@ class Car {
 
   //-----------------------------------------------------------------------------------------//
 
-  Car(int x, int y, int w, int h, int speed) {
+  Car(int x, int y, int w, int h, float speed) {
     this.pos = new PVector(x, y); 
     this.size_w = w;
     this.size_h = h;
@@ -41,7 +42,7 @@ class Car {
 
   //-----------------------------------------------------------------------------------------//
 
-  Car(int x, int y, int w, int h, int speed, MultiLayerPerceptron b) {
+  Car(int x, int y, int w, int h, float speed, MultiLayerPerceptron b) {
     this.pos = new PVector(x, y); 
     this.size_w = w;
     this.size_h = h;

@@ -96,7 +96,7 @@ class GeneticAlgorithm {
     double[] newWeights = new double[w.length];
 
     for (int i = 0; i < w.length; i++) {
-      if (random(1) < 0.3) 
+      if (random(1) < 0.1) 
         newWeights[i] = random(-1, 1);
       else 
         newWeights[i] = w[i];
