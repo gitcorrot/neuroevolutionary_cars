@@ -7,11 +7,14 @@ import java.util.*;
 //-----------------------------------------------------------------------------------------//
 
 static final int MAX_DISTANCE = 75;
-static final int SPEED = 2;
+static final int SPEED = 5;
+static final int TURNING_SPEED = 3;
 static final int THICKNESS = 150;
-static final int POPULATION_SIZE = 10;
+static final int POPULATION_SIZE = 500;
+static final float MUTATION_RATE = 0.1;
 
-//Car car;
+static int generation;
+
 ArrayList<Obstacle> obstacles;
 ArrayList<Car> cars;
 PVector start, finish;
@@ -23,9 +26,10 @@ GeneticAlgorithm ga;
 
 void setup() {
   size(800, 600);
+  frameRate(60);
   //finish = new PVector(2*THICKNESS, height-THICKNESS/2);
 
-  finishLine = new Obstacle(300, 300, height-THICKNESS, height-5);
+  finishLine = new Obstacle(width-THICKNESS, width-5, 50, 50);
   finishLine.c = color(0, 255, 0);
 
   start = new PVector(70, 50);
@@ -34,7 +38,9 @@ void setup() {
   initializeObstacles();
 
   ga = new GeneticAlgorithm();
-  cars = ga.newPopulation();
+  cars = ga.initPopulation();
+
+  generation = 0;
 }
 
 //-----------------------------------------------------------------------------------------//
@@ -49,20 +55,27 @@ void draw() {
   fill(255, 55, 120);
   ellipse(finish.x, finish.y, 55, 55);
 
+  textSize(24);
+  textAlign(CENTER);
+  text("Generation: " + generation, width/2, 50); 
+
+  finishLine.show();
+
   for (Obstacle o : obstacles) {
     o.show();
   }
 
-  finishLine.show();
-
   if (ga.checkAllDead()) {
-    ga.calculateTotalFitness();
+    cars = ga.newPopulation();
+    generation++;
   }
 
   for (Car car : cars) {
-    car.update();
-    car.updateDistances(obstacles);
-    car.show();
+    if (!car.dead) {
+      car.updateDistances(obstacles);
+      car.update();
+      car.show();
+    }
   }
 }
 
@@ -82,6 +95,9 @@ void initializeObstacles() {
   obstacles.add(new Obstacle(5, 5, 5, height-5));
   obstacles.add(new Obstacle(width-5, width-5, 5, height-5));
   obstacles.add(new Obstacle(5, width-5, height-5, height-5));
+
+  // after finish
+  //obstacles.add(new Obstacle(350, 350, height-THICKNESS, height-5));
 }
 
 //-----------------------------------------------------------------------------------------//
@@ -89,9 +105,9 @@ void initializeObstacles() {
 // DEBUGGING
 void keyPressed() {
   if (key == 'a') {
-    cars.get(0).rotateBy(-6);
+    cars.get(0).rotateBy(TURNING_SPEED);
   }
   if (key == 'd') {
-    cars.get(0).rotateBy(6);
+    cars.get(0).rotateBy(-TURNING_SPEED);
   }
 }

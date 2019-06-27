@@ -4,9 +4,11 @@ class Car {
   PVector pos;
   float rotation;
   float fitness;
-  float dist1, dist2, dist3;
+  double dists[] = new double[4]; // 0-2 sight, 3 - dist to finish
   boolean dead;
   ArrayList<Ray> rays;
+
+  MultiLayerPerceptron brain;
 
   //-----------------------------------------------------------------------------------------//
 
@@ -18,9 +20,10 @@ class Car {
     this.rotation = 90; // to head forward
     this.dead = false;
     this.fitness = 0;
-    this.dist1 = MAX_DISTANCE;
-    this.dist2 = MAX_DISTANCE;
-    this.dist3 = MAX_DISTANCE;
+    this.dists[0] = MAX_DISTANCE;
+    this.dists[1] = MAX_DISTANCE;
+    this.dists[2] = MAX_DISTANCE;
+    this.dists[3] = 10000;
 
     rays = new ArrayList() {
       {
@@ -29,6 +32,37 @@ class Car {
         add(new Ray(-60));
       }
     };
+
+    this.brain = new MultiLayerPerceptron(4, 4, 1);
+
+    //println("\n\nWEIGHTS\n\n");
+    //println(this.brain.getWeights());
+  }
+
+  //-----------------------------------------------------------------------------------------//
+
+  Car(int x, int y, int w, int h, int speed, MultiLayerPerceptron b) {
+    this.pos = new PVector(x, y); 
+    this.size_w = w;
+    this.size_h = h;
+    this.speed = speed;
+    this.rotation = 90; // to head forward
+    this.dead = false;
+    this.fitness = 0;
+    this.dists[0] = MAX_DISTANCE;
+    this.dists[1] = MAX_DISTANCE;
+    this.dists[2] = MAX_DISTANCE;
+    this.dists[3] = 10000;
+
+    rays = new ArrayList() {
+      {
+        add(new Ray(0));
+        add(new Ray(60));
+        add(new Ray(-60));
+      }
+    };
+
+    this.brain = b;
   }
 
   //-----------------------------------------------------------------------------------------//
@@ -41,10 +75,41 @@ class Car {
   //-----------------------------------------------------------------------------------------//
 
   void updateDistances(ArrayList<Obstacle> obs) {
-    this.dist1 = constrain(rays.get(0).findObstacles(obs, this.pos, this.rotation), 0, MAX_DISTANCE);
-    this.dist2 = constrain(rays.get(1).findObstacles(obs, this.pos, this.rotation), 0, MAX_DISTANCE);
-    this.dist3 = constrain(rays.get(2).findObstacles(obs, this.pos, this.rotation), 0, MAX_DISTANCE);
-    // println("dist1: " + this.dist1 + "  dist2: " + this.dist2 + "  dist3: " + this.dist3);
+    this.dists[0] = constrain(rays.get(0).findObstacles(obs, this.pos, this.rotation), 0, MAX_DISTANCE);
+    this.dists[1] = constrain(rays.get(1).findObstacles(obs, this.pos, this.rotation), 0, MAX_DISTANCE);
+    this.dists[2] = constrain(rays.get(2).findObstacles(obs, this.pos, this.rotation), 0, MAX_DISTANCE);
+    this.dists[3] = PVector.dist(this.pos, finish);
+
+    // println("dist0: " + this.dists[0] + "  dist1: " + this.dists[1] + "  dist2: " + this.dists[2]);
+  }
+
+  //-----------------------------------------------------------------------------------------//
+
+  void update() {
+    if (!this.dead) {
+
+      if (this.dists[0] < 10 || this.dists[1] < 10 || this.dists[2] < 10) 
+        this.kill();
+
+      if (dists[3] < 30) 
+        this.win(); 
+
+      if (this.rotation >  360 || this.rotation < -360) 
+        this.rotation = this.rotation % 360;
+
+      PVector vel = PVector.fromAngle(radians(this.rotation));
+      this.pos.add(vel.mult(this.speed));
+
+      this.brain.setInput(getInputs());
+      this.brain.calculate();
+
+      if (this.brain.getOutput()[0] > 0.5) 
+        rotateBy(-TURNING_SPEED);
+      else
+        rotateBy(TURNING_SPEED);
+      //if (this.brain.getOutput()[1] > 0.5) 
+      //  rotateBy(6);
+    }
   }
 
   //-----------------------------------------------------------------------------------------//
@@ -71,21 +136,15 @@ class Car {
 
   //-----------------------------------------------------------------------------------------//
 
-  void update() {
-    if (!this.dead) {
+  double[] getInputs() {
+    double[] i = new double[4];
 
-      if (this.dist1 < 10 || this.dist2 < 10 || this.dist3 < 10) 
-        this.kill();
+    i[0] = map((float)dists[0], 0, MAX_DISTANCE, 0, 1);
+    i[1] = map((float)dists[1], 0, MAX_DISTANCE, 0, 1);
+    i[2] = map((float)dists[2], 0, MAX_DISTANCE, 0, 1);
+    i[3] = 1 / dists[3];
 
-      if (PVector.dist(this.pos, finish) < 10) 
-        this.win(); 
-
-      if (this.rotation >  360 || this.rotation < -360) 
-        this.rotation = this.rotation % 360;
-
-      PVector vel = PVector.fromAngle(radians(this.rotation));
-      this.pos.add(vel.mult(this.speed));
-    }
+    return i;
   }
 
   //-----------------------------------------------------------------------------------------//
