@@ -1,11 +1,11 @@
 class Car {
 
-  int size_w, size_h, speed;
+  final int size_w, size_h, speed;
+  PVector pos;
   float rotation;
+  float fitness;
   float dist1, dist2, dist3;
   boolean dead;
-  float fitness;
-  PVector pos;
   ArrayList<Ray> rays;
 
   //-----------------------------------------------------------------------------------------//
@@ -44,7 +44,29 @@ class Car {
     this.dist1 = constrain(rays.get(0).findObstacles(obs, this.pos, this.rotation), 0, MAX_DISTANCE);
     this.dist2 = constrain(rays.get(1).findObstacles(obs, this.pos, this.rotation), 0, MAX_DISTANCE);
     this.dist3 = constrain(rays.get(2).findObstacles(obs, this.pos, this.rotation), 0, MAX_DISTANCE);
-    println("dist1: " + this.dist1 + "  dist2: " + this.dist2 + "  dist3: " + this.dist3);
+    // println("dist1: " + this.dist1 + "  dist2: " + this.dist2 + "  dist3: " + this.dist3);
+  }
+
+  //-----------------------------------------------------------------------------------------//
+
+  void calculateFitness() {
+    float d = PVector.dist(this.pos, finish);
+    this.fitness = 1/d;
+    // println("Fitness: " + this.fitness);
+  }
+
+  //-----------------------------------------------------------------------------------------//
+
+  void kill() {
+    this.dead = true;
+    this.calculateFitness();
+  }
+
+  //-----------------------------------------------------------------------------------------//
+
+  void win() {
+    this.dead = true;
+    this.fitness = 1;
   }
 
   //-----------------------------------------------------------------------------------------//
@@ -53,10 +75,10 @@ class Car {
     if (!this.dead) {
 
       if (this.dist1 < 10 || this.dist2 < 10 || this.dist3 < 10) 
-        this.dead = true;
+        this.kill();
 
-      if (PVector.dist(this.pos, finish) < 25) 
-        this.dead = true; 
+      if (PVector.dist(this.pos, finish) < 10) 
+        this.win(); 
 
       if (this.rotation >  360 || this.rotation < -360) 
         this.rotation = this.rotation % 360;
@@ -69,8 +91,9 @@ class Car {
   //-----------------------------------------------------------------------------------------//
 
   void show() {
-    fill(0, 0, 255);
+    fill(0, 0, 255, 100);
     strokeWeight(1);
+    stroke(0);
 
     pushMatrix();
     rectMode(CENTER);
