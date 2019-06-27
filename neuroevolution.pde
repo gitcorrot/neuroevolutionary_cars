@@ -4,21 +4,29 @@ import org.neuroph.util.*;
 
 import java.util.*;
 
+//-----------------------------------------------------------------------------------------//
+
+final int MAX_DISTANCE = 75;
+final int SPEED = 2;
+final int THICKNESS = 150;
+
 Car car;
-ArrayList<Obstacle> obstacles = new ArrayList();
-int thickness = 150;
-int speed = 2;
+ArrayList<Obstacle> obstacles;
 PVector start, finish;
+
+//-----------------------------------------------------------------------------------------//
 
 void setup() {
   size(800, 600);
   start = new PVector(70, 50);
-  finish = new PVector(2*thickness, height-thickness/2);
+  finish = new PVector(2*THICKNESS, height-THICKNESS/2);
 
   initializeObstacle();
 
-  car = new Car((int)start.x, (int)start.y, 30, 10, speed);
+  car = new Car((int)start.x, (int)start.y, 30, 10, SPEED);
 }
+
+//-----------------------------------------------------------------------------------------//
 
 void draw() {
   background(255, 255, 255);
@@ -34,12 +42,31 @@ void draw() {
   }
 
   car.update();
-  println(car.dead);
   car.updateDistances(obstacles);
   car.show();
 }
 
+//-----------------------------------------------------------------------------------------//
 
+void initializeObstacle() {
+
+  obstacles = new ArrayList();
+
+  obstacles.add(new Obstacle(width - THICKNESS, width - THICKNESS, 5, height - THICKNESS));
+  obstacles.add(new Obstacle(width - THICKNESS, THICKNESS, height - THICKNESS, height - THICKNESS));
+  obstacles.add(new Obstacle(THICKNESS, THICKNESS, height - THICKNESS, 5));
+
+  obstacles.add(new Obstacle(5, THICKNESS, 5, 5));
+  obstacles.add(new Obstacle(width-THICKNESS, width-5, 5, 5));
+
+  obstacles.add(new Obstacle(5, 5, 5, height-5));
+  obstacles.add(new Obstacle(width-5, width-5, 5, height-5));
+  obstacles.add(new Obstacle(5, width-5, height-5, height-5));
+}
+
+//-----------------------------------------------------------------------------------------//
+
+// DEBUGGING
 void keyPressed() {
   if (key == 'a') {
     car.rotateBy(-6);
@@ -47,18 +74,4 @@ void keyPressed() {
   if (key == 'd') {
     car.rotateBy(6);
   }
-}
-
-void initializeObstacle() {
-
-  obstacles.add(new Obstacle(width - thickness, width - thickness, 5, height - thickness));
-  obstacles.add(new Obstacle(width - thickness, thickness, height - thickness, height - thickness));
-  obstacles.add(new Obstacle(thickness, thickness, height - thickness, 5));
-
-  obstacles.add(new Obstacle(5, thickness, 5, 5));
-  obstacles.add(new Obstacle(width-thickness, width-5, 5, 5));
-
-  obstacles.add(new Obstacle(5, 5, 5, height-5));
-  obstacles.add(new Obstacle(width-5, width-5, 5, height-5));
-  obstacles.add(new Obstacle(5, width-5, height-5, height-5));
 }

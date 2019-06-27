@@ -1,10 +1,14 @@
 class Ray {
 
   int offset;
+  
+  //-----------------------------------------------------------------------------------------//
 
   Ray(int offset) {
     this.offset = offset;
   }
+  
+  //-----------------------------------------------------------------------------------------//
 
   float findObstacles(ArrayList<Obstacle> obstacles, PVector pos, float rotation) {
 
@@ -37,6 +41,8 @@ class Ray {
 
     return PVector.dist(pos, getNearest(intersections, pos));
   }
+  
+  //-----------------------------------------------------------------------------------------//
 
   PVector getNearest(ArrayList<PVector> vectors, PVector position) {
     PVector shortest = new PVector();

@@ -4,8 +4,11 @@ class Car {
   float rotation;
   float dist1, dist2, dist3;
   boolean dead;
+  float fitness;
   PVector pos;
   ArrayList<Ray> rays;
+
+  //-----------------------------------------------------------------------------------------//
 
   Car(int x, int y, int w, int h, int speed) {
     this.pos = new PVector(x, y); 
@@ -14,9 +17,10 @@ class Car {
     this.speed = speed;
     this.rotation = 90; // to head forward
     this.dead = false;
-    dist1 = 999;
-    dist2 = 999;
-    dist3 = 999;
+    this.fitness = 0;
+    this.dist1 = MAX_DISTANCE;
+    this.dist2 = MAX_DISTANCE;
+    this.dist3 = MAX_DISTANCE;
 
     rays = new ArrayList() {
       {
@@ -27,32 +31,47 @@ class Car {
     };
   }
 
+  //-----------------------------------------------------------------------------------------//
+
   void rotateBy(float angle) {
     if (!dead)
       this.rotation += angle;
   }
 
+  //-----------------------------------------------------------------------------------------//
+
   void updateDistances(ArrayList<Obstacle> obs) {
-    dist1 = rays.get(0).findObstacles(obs, this.pos, this.rotation);
-    dist2 = rays.get(1).findObstacles(obs, this.pos, this.rotation);
-    dist3 = rays.get(2).findObstacles(obs, this.pos, this.rotation);
-    //println("dist1: " + dist1 + "  dist2: " + dist2 + "  dist3: " + dist3);
+    this.dist1 = constrain(rays.get(0).findObstacles(obs, this.pos, this.rotation), 0, MAX_DISTANCE);
+    this.dist2 = constrain(rays.get(1).findObstacles(obs, this.pos, this.rotation), 0, MAX_DISTANCE);
+    this.dist3 = constrain(rays.get(2).findObstacles(obs, this.pos, this.rotation), 0, MAX_DISTANCE);
+    println("dist1: " + this.dist1 + "  dist2: " + this.dist2 + "  dist3: " + this.dist3);
   }
+
+  //-----------------------------------------------------------------------------------------//
 
   void update() {
-    if (dist1 < 10 || dist2 < 10 || dist3 < 10) {
-      this.dead = true;
-    } else {
-      if (rotation >  360 || rotation < -360) rotation = rotation % 360;
+    if (!this.dead) {
+
+      if (this.dist1 < 10 || this.dist2 < 10 || this.dist3 < 10) 
+        this.dead = true;
+
+      if (PVector.dist(this.pos, finish) < 25) 
+        this.dead = true; 
+
+      if (this.rotation >  360 || this.rotation < -360) 
+        this.rotation = this.rotation % 360;
 
       PVector vel = PVector.fromAngle(radians(this.rotation));
-      this.pos.add(vel.mult(speed));
+      this.pos.add(vel.mult(this.speed));
     }
   }
+
+  //-----------------------------------------------------------------------------------------//
 
   void show() {
     fill(0, 0, 255);
     strokeWeight(1);
+
     pushMatrix();
     rectMode(CENTER);
     translate(this.pos.x, this.pos.y);
